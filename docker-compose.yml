@@ -1,0 +1,109 @@
+version: '3'
+
+services:
+  nginx_lb:
+    image: nginx:latest
+    container_name: nginx_lb
+    ports:
+      - "80:80"   # HTTP
+      - "443:443" # HTTPS
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf  # Đảm bảo nginx.conf được cấu hình đúng
+    depends_on:
+      - web1_api
+      - web1_gui
+      - redis
+    networks:
+      - backend
+      - monitoring
+    environment:
+      - NGINX_HOST=nginx_lb
+      - NGINX_PORT=80
+
+  web1_api:
+    build:
+      context: ./web1          # Thư mục chứa cả Dockerfile.API và Dockerfile.GUI
+      dockerfile: Dockerfile.API   # Sử dụng Dockerfile.API cho dịch vụ API
+    container_name: web1_api
+    ports:
+      - "5106:5106"  # Cổng API
+    depends_on:
+      - redis
+    networks:
+      - backend
+      - monitoring
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+
+  web1_gui:
+    build:
+      context: ./web1          # Thư mục chứa cả Dockerfile.API và Dockerfile.GUI
+      dockerfile: Dockerfile.GUI   # Sử dụng Dockerfile.GUI cho dịch vụ GUI
+    container_name: web1_gui
+    ports:
+      - "8080:8080"  # Cổng GUI
+    depends_on:
+      - redis
+    networks:
+      - backend
+      - monitoring
+    environment:
+      - ASPNETCORE_URLS=http://+:8080  # Đảm bảo GUI chạy đúng trên cổng 8080
+
+  nginx_exporter:
+    image: nginx/nginx-prometheus-exporter:latest
+    container_name: nginx_exporter
+    ports:
+      - "9113:9113"  # Để Prometheus thu thập dữ liệu
+    depends_on:
+      - nginx_lb
+    networks:
+      - monitoring
+    environment:
+      - NGINX_SERVER=nginx_lb:80  # Cấu hình chỉ định nginx_lb là nguồn dữ liệu
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"  # Mở cổng Redis cho các dịch vụ khác kết nối
+    networks:
+      - backend
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml  # Cấu hình Prometheus
+    ports:
+      - "9090:9090"  # Cổng giao diện của Prometheus
+    depends_on:
+      - nginx_exporter
+    networks:
+      - monitoring
+    environment:
+      - PROMETHEUS_TARGETS=nginx_exporter:9113  # Chỉ định targets cho Prometheus
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"  # Cổng giao diện của Grafana
+    volumes:
+      - grafana_data:/var/lib/grafana  # Volume để lưu trữ dữ liệu của Grafana
+    depends_on:
+      - prometheus
+    networks:
+      - monitoring
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin  # Đặt mật khẩu cho admin (có thể thay đổi)
+
+networks:
+  backend:
+    driver: bridge
+  monitoring:
+    driver: bridge
+
+volumes:
+  grafana_data:
+  redis_data:
