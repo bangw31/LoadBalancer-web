@@ -6,7 +6,6 @@ services:
     container_name: nginx_lb
     ports:
       - "80:80"   # HTTP
-      - "443:443" # HTTPS
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf  # Đảm bảo nginx.conf được cấu hình đúng
     depends_on:
