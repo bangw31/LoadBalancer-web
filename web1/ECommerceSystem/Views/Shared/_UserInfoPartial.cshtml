@@ -1,0 +1,8 @@
+﻿@if (User?.Identity?.IsAuthenticated == true)
+{
+    <div class="user-info">
+        <img src="~/images/default-avatar.png" alt="Avatar" class="avatar" />
+        <span>@User.Identity.Name</span>
+        <a asp-controller="Account" asp-action="Profile">View Profile</a>
+    </div>
+}

@@ -1,0 +1,63 @@
+﻿@using ECommerceSystem.Shared.DTOs.Models
+@model LoginModel
+
+@{
+    ViewData["Title"] = "Đăng nhập";
+}
+
+<div class="container mt-5" style="max-width: 500px;">
+    <h2 class="mb-4 text-center">Đăng nhập</h2>
+
+    <form id="loginForm" asp-action="Login" asp-controller="Account" method="post">
+        <div class="form-group mb-3">
+            <label asp-for="Username"></label>
+            <input asp-for="Username" class="form-control" />
+            <span asp-validation-for="Username" class="text-danger"></span>
+        </div>
+
+        <div class="form-group mb-3">
+            <label asp-for="Password"></label>
+            <input asp-for="Password" class="form-control" type="password" />
+            <span asp-validation-for="Password" class="text-danger"></span>
+        </div>
+
+        @if (!string.IsNullOrEmpty(ViewBag.ErrorMessage))
+        {
+            <div id="loginError" class="alert alert-danger">@ViewBag.ErrorMessage</div>
+        }
+        else
+        {
+            <div id="loginError" class="alert alert-danger d-none"></div>
+        }
+
+        <button type="submit" class="btn btn-primary w-100">Đăng nhập</button>
+    </form>
+
+    <div class="text-center mt-3">
+        <p>Bạn chưa có tài khoản? <a asp-controller="Account" asp-action="Register">Đăng ký</a></p>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    @* Lưu token + user vào localStorage nếu login thành công *@
+    @if (ViewBag.Token != null)
+    {
+        <script>
+            localStorage.setItem("authToken", "@ViewBag.Token");
+            localStorage.setItem("currentUser", JSON.stringify({
+                id: "@ViewBag.UserId",
+                name: "@ViewBag.UserName",
+                role: "@ViewBag.Role"
+            }));
+
+            // Redirect theo role
+            if ("@ViewBag.Role" === "Admin") {
+                window.location.href = "/Admin/Index";
+            } else {
+                window.location.href = "/Home/Index";
+            }
+        </script>
+    }
+}

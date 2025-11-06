@@ -1,0 +1,85 @@
+﻿<!-- 🟢 Nút chat bubble -->
+<div id="chatBubble"
+     style="position:fixed; bottom:20px; right:20px; width:60px; height:60px;
+            border-radius:50%; background:#0d6efd; color:white;
+            display:flex; align-items:center; justify-content:center;
+            cursor:pointer; z-index:1000; transition:all 0.3s ease;
+            box-shadow:0 4px 10px rgba(0,0,0,0.2);">
+    <i class="fas fa-comment" style="font-size:22px;"></i>
+</div>
+
+<!-- 💬 Hộp chat -->
+<div id="userChatContainer"
+     style="display:none; position:fixed; bottom:90px; right:20px;
+            width:320px; max-height:420px; background:white;
+            border:1px solid #ccc; border-radius:10px;
+            box-shadow:0 4px 20px rgba(0,0,0,0.2);
+            overflow:hidden; z-index:1000;">
+    <div id="chatHeader" style="padding:8px; background:#0d6efd; color:white; display:flex; justify-content:space-between; align-items:center;">
+        <span>Chat Hỗ trợ</span>
+        <button id="closeChat" style="background:none; border:none; color:white; font-size:16px; cursor:pointer;">✖</button>
+    </div>
+
+    <div id="chatMessages" style="padding:8px; height:300px; overflow-y:auto; background:#f8f9fa;"></div>
+
+    <div style="padding:8px; display:flex; gap:5px;">
+        <input id="chatMessageInput" type="text" placeholder="Nhập tin nhắn..." style="flex:1; padding:6px; border-radius:6px; border:1px solid #ccc;" />
+        <label for="chatFileInput" style="background:#0d6efd; color:white; padding:6px 8px; border-radius:6px; cursor:pointer;">📎</label>
+        <input type="file" id="chatFileInput" style="display:none;" />
+        <button id="sendChatMessage" style="padding:6px 12px; border:none; background:#0d6efd; color:white; border-radius:6px; cursor:pointer;">Gửi</button>
+    </div>
+</div>
+
+<style>
+    #chatBubble:hover {
+        transform: scale(1.05);
+        background: #0b5ed7;
+    }
+
+    #chatBubble.active {
+        background: #198754 !important;
+        box-shadow: 0 0 10px rgba(25,135,84,0.6);
+    }
+</style>
+
+<script>
+    window.addEventListener("load", function () {
+        if (typeof $ === "undefined") { console.error("❌ jQuery chưa load"); return; }
+
+        const bubble = $("#chatBubble");
+        const container = $("#userChatContainer");
+        const closeBtn = $("#closeChat");
+        const fileInput = $("#chatFileInput");
+        const messageInput = $("#chatMessageInput");
+
+        // Toggle chat container
+        bubble.off("click").on("click", function () {
+            if (container.is(":visible")) {
+                container.fadeOut(200);
+                bubble.removeClass("active");
+            } else {
+                bubble.addClass("active");
+                container.fadeIn(200, function () {
+                    if (!container.hasClass("loaded")) {
+                        if (typeof initUserChat === "function") initUserChat();
+                        container.addClass("loaded");
+                    }
+                });
+            }
+        });
+
+        // Close chat
+        closeBtn.off("click").on("click", function () {
+            container.fadeOut(200);
+            bubble.removeClass("active");
+        });
+
+        // Chọn file
+        fileInput.off("change").on("change", function (e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            console.log("Đã chọn file:", file.name, file.type, file.size);
+            window.selectedFile = file; // Lưu tạm để gửi sau
+        });
+    });
+</script>

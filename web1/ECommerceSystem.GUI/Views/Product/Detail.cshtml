@@ -1,0 +1,491 @@
+﻿@model ECommerceSystem.Shared.DTOs.Product.ProductDTO
+@{
+    ViewData["Title"] = "Chi tiết sản phẩm";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var relatedProducts = ViewBag.RelatedProducts as List<ECommerceSystem.Shared.DTOs.Product.ProductDTO>;
+
+    // ----- FIX: Unbox ViewBag.UserRating chính xác -----
+    int? userRating = null;
+    if (ViewBag.UserRating is int i) userRating = i;
+    else if (ViewBag.UserRating is int?) userRating = (int?)ViewBag.UserRating;
+
+    // --- Tách & gom mô tả thành các phần có ý nghĩa ---
+    var rawDesc = (Model.Description ?? "").Replace("\r\n", "\n").Trim();
+    var sections = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+    if (!string.IsNullOrWhiteSpace(rawDesc))
+    {
+        var headers = new[]
+        {
+            "Cấu hình & Bộ nhớ",
+            "Camera & Màn hình",
+            "Pin & Sạc",
+            "Tiện ích",
+            "Kết nối",
+            "Thiết kế & Chất liệu"
+        };
+
+        var found = new List<(int pos, string header)>();
+        foreach (var h in headers)
+        {
+            var idx = rawDesc.IndexOf(h, StringComparison.OrdinalIgnoreCase);
+            if (idx >= 0) found.Add((idx, h));
+        }
+
+        if (found.Any())
+        {
+            var ordered = found.OrderBy(f => f.pos).ToList();
+            for (int i2 = 0; i2 < ordered.Count; i2++)
+            {
+                var start = ordered[i2].pos;
+                var end = (i2 + 1 < ordered.Count) ? ordered[i2 + 1].pos : rawDesc.Length;
+                var block = rawDesc.Substring(start, end - start).Trim();
+
+                var header = ordered[i2].header;
+                var content = block;
+                if (content.Length >= header.Length && content.Substring(0, header.Length).Equals(header, StringComparison.OrdinalIgnoreCase))
+                    content = content.Substring(header.Length).Trim(new char[] { ':', ' ', '\n', '\r' });
+
+                if (string.IsNullOrWhiteSpace(content))
+                    content = "(Không có mô tả chi tiết)";
+
+                sections[header] = content;
+            }
+
+            var firstPos = ordered.First().pos;
+            if (firstPos > 0)
+            {
+                var pre = rawDesc.Substring(0, firstPos).Trim();
+                if (!string.IsNullOrWhiteSpace(pre))
+                {
+                    var merged = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                    {
+                        { "Thông tin chung", pre }
+                    };
+                    foreach (var kv in sections) merged[kv.Key] = kv.Value;
+                    sections = merged;
+                }
+            }
+        }
+        else
+        {
+            var parts = rawDesc.Split(new[] { "\n\n" }, StringSplitOptions.RemoveEmptyEntries)
+                               .Select(p => p.Trim())
+                               .Where(p => !string.IsNullOrWhiteSpace(p))
+                               .ToList();
+
+            if (parts.Count == 1)
+                sections["Thông tin sản phẩm"] = parts[0];
+            else
+                for (int i3 = 0; i3 < parts.Count; i3++)
+                    sections[$"Thông tin {i3 + 1}"] = parts[i3];
+        }
+    }
+}
+<!-- Custom CSS -->
+<style>
+    .rating-stars {
+        color: #ffc107;
+        margin-bottom: 0.5rem;
+    }
+
+    .star-btn {
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        padding: 0 4px;
+    }
+
+        .star-btn .fa-star {
+            font-size: 1.05rem;
+        }
+
+    .user-rated {
+        color: #28a745;
+        font-weight: 600;
+    }
+
+    /* Accordion / specs styling */
+    .specs-accordion .accordion-button {
+        background: #f8fafc;
+        color: #374151;
+        font-weight: 600;
+    }
+
+    .specs-accordion .accordion-body {
+        background: #ffffff;
+        color: #475569;
+        line-height: 1.6;
+    }
+
+    .specs-accordion .spec-key {
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .specs-accordion .spec-val {
+        color: #334155;
+    }
+</style>
+
+<div class="container py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb breadcrumb-custom">
+            <li class="breadcrumb-item"><a href="/">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a href="/products">Sản phẩm</a></li>
+            <li class="breadcrumb-item active" aria-current="page">@Model.Name</li>
+        </ol>
+    </nav>
+
+    <!-- Chi tiết sản phẩm -->
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <img src="@Model.ThumbnailUrl"
+                 class="img-fluid product-image w-100"
+                 alt="@Model.Name"
+                 onerror="this.src='/images/default-product.jpg'" />
+        </div>
+
+        <div class="col-lg-6">
+            <div class="product-info h-100 d-flex flex-column">
+                <h1 class="mb-3">@Model.Name</h1>
+
+                <div class="mb-3">
+                    <div class="price-tag">@Model.Price.ToString("N0") đ</div>
+                </div>
+
+                <!-- Accordion mô tả -->
+                @if (sections != null && sections.Count > 0)
+                {
+                    <div class="mb-4">
+                        <div class="accordion specs-accordion" id="specAccordion@Model.Id">
+                            @{
+                                var idx = 0;
+                            }
+                            @foreach (var kv in sections)
+                            {
+                                var heading = kv.Key;
+                                var content = kv.Value;
+                                var collapseId = $"collapse{Model.Id}_{idx}";
+                                var headingId = $"heading{Model.Id}_{idx}";
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header" id="@headingId">
+                                        <button class="accordion-button @(idx == 0 ? "" : "collapsed")"
+                                                type="button"
+                                                data-bs-toggle="collapse"
+                                                data-bs-target="#@collapseId"
+                                                aria-expanded="@(idx == 0 ? "true" : "false")"
+                                                aria-controls="@collapseId">
+                                            @heading
+                                        </button>
+                                    </h2>
+
+                                    <div id="@collapseId"
+                                         class="accordion-collapse collapse @(idx == 0 ? "show" : "")"
+                                         aria-labelledby="@headingId"
+                                         data-bs-parent="#specAccordion@Model.Id">
+                                        <div class="accordion-body">
+                                            @{
+                                                var lines = content
+                                                .Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries)
+                                                .Select(s => s.Trim())
+                                                .Where(s => !string.IsNullOrWhiteSpace(s))
+                                                .ToList();
+                                            }
+                                            @foreach (var line in lines)
+                                            {
+                                                <p>@Html.Raw(System.Net.WebUtility.HtmlEncode(line).Replace("&lt;br&gt;", "<br/>"))</p>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                                idx++;
+                            }
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted mb-4 flex-grow-1">@Model.Description</p>
+                }
+
+                <div class="mb-3">
+                    <span class="stock-badge @(Model.Stock > 0 ? "in-stock" : "out-of-stock")">
+                        <i class="fas @(Model.Stock > 0 ? "fa-check-circle" : "fa-times-circle") me-2"></i>
+                        @(Model.Stock > 0 ? $"Còn hàng ({Model.Stock} sản phẩm)" : "Hết hàng")
+                    </span>
+                </div>
+
+                <div class="mb-2">
+                    <div id="product-rating"
+                         class="rating-stars"
+                         data-average="@Model.Rating.GetValueOrDefault(0)"
+                         data-user="@(userRating?.ToString() ?? "")">
+                        <!-- rendered by JS -->
+                    </div>
+                    <div class="small text-muted mt-1" id="rating-text">
+                        @(Model.Rating.HasValue? Model.Rating.Value.ToString("0.0") : "Chưa có đánh giá")
+                    </div>
+                </div>
+
+                @Html.AntiForgeryToken() <!-- để token xuất hiện trong page -->
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <div class="mb-3">
+    <span class="me-2">Đánh giá của bạn:</span>
+    <div id="user-rating" style="display:inline-block;">
+        @for (int star = 1; star <= 5; star++)
+        {
+            <button type="button" class="star-btn" data-value="@star" title="@star">
+                <i class="far fa-star"></i>
+            </button>
+        }
+    </div>
+    <span id="rating-feedback" class="ms-2 small text-success" style="display:none;">
+        Cảm ơn bạn đã đánh giá!
+    </span>
+</div>
+
+                }
+                else
+                {
+                    <div class="small text-muted">Vui lòng <a asp-controller="Account" asp-action="Login">đăng nhập</a> để đánh giá</div>
+                }
+
+                @if (Model.Stock > 0)
+                {
+                    <!-- Form POST tới CartController.AddToCart -->
+                    <form asp-controller="Cart" asp-action="AddToCart" method="post" id="addToCartForm" class="w-100">
+                        @Html.AntiForgeryToken()
+                        <div class="quantity-selector">
+                            <span class="me-3 fw-semibold">Số lượng:</span>
+                            <button type="button" class="quantity-btn" onclick="decreaseQuantity()">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <input type="number" id="quantity" name="quantity" class="quantity-input" value="1" min="1" max="@Model.Stock" />
+                            <button type="button" class="quantity-btn" onclick="increaseQuantity()">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <input type="hidden" name="productId" value="@Model.Id" />
+                        </div>
+
+                        <div class="d-flex gap-3 mt-4">
+                            <button type="submit" class="btn add-to-cart-btn flex-fill">
+                                <i class="fas fa-cart-plus me-2"></i>Thêm vào giỏ hàng
+                            </button>
+                            <button type="button" class="btn btn-outline-danger" onclick="addToWishlist()">
+                                <i class="far fa-heart"></i>
+                            </button>
+                        </div>
+                    </form>
+                }
+                else
+                {
+                    <button class="btn btn-secondary mt-4" disabled>
+                        <i class="fas fa-ban me-2"></i>Hết hàng
+                    </button>
+                }
+
+                <div class="mt-4 pt-4 border-top">
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <i class="fas fa-shipping-fast text-primary mb-2 fs-4"></i>
+                            <p class="small mb-0">Miễn phí vận chuyển</p>
+                        </div>
+                        <div class="col-4">
+                            <i class="fas fa-undo text-success mb-2 fs-4"></i>
+                            <p class="small mb-0">30 ngày đổi trả</p>
+                        </div>
+                        <div class="col-4">
+                            <i class="fas fa-headset text-info mb-2 fs-4"></i>
+                            <p class="small mb-0">Hỗ trợ 24/7</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comments Section -->
+    <div class="product-comments mt-5">
+        <h4>Bình luận sản phẩm</h4>
+
+        <input type="hidden" id="productId" value="@Model.Id" />
+        @if (User.Identity.IsAuthenticated)
+        {
+            <textarea id="commentInput" class="form-control mb-2" placeholder="Viết bình luận..."></textarea>
+            <button id="commentBtn" class="btn btn-primary mb-3">Gửi</button>
+        }
+        else
+        {
+            <p class="small text-muted">Vui lòng <a asp-controller="Account" asp-action="Login">đăng nhập</a> để bình luận</p>
+        }
+
+        <div id="commentsList" class="list-group"></div>
+    </div>
+
+    <!-- Sản phẩm liên quan -->
+    @if (relatedProducts != null && relatedProducts.Any())
+    {
+        <div class="related-products">
+            <h2 class="section-title">Sản phẩm liên quan</h2>
+            <div class="row g-4">
+                @foreach (var item in relatedProducts)
+                {
+                    <div class="col-lg-3 col-md-6">
+                        <div class="card product-card h-100">
+                            <img src="@item.ThumbnailUrl"
+                                 class="card-img-top"
+                                 alt="@item.Name"
+                                 onerror="this.src='/images/default-product.jpg'" />
+                            <div class="card-body product-card-body d-flex flex-column">
+                                <h5 class="product-card-title">@item.Name</h5>
+                                <p class="card-text text-muted small flex-grow-1">
+                                    @(item.Description?.Length > 50 ? item.Description.Substring(0, 50) + "..." : item.Description)
+                                </p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="product-card-price">@item.Price.ToString("N0") đ</span>
+                                    <a href="@Url.Action("Detail", "Product", new { id = item.Id })" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="text-center mt-4">
+                <a href="/products" class="btn btn-outline-primary">
+                    Xem thêm sản phẩm <i class="fas fa-arrow-right ms-2"></i>
+                </a>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- JS xử lý số lượng -->
+<script>
+    function increaseQuantity() {
+        const quantityInput = document.getElementById('quantity');
+        const currentValue = parseInt(quantityInput.value || "1");
+        const maxValue = parseInt(quantityInput.max || "1");
+        if (currentValue < maxValue) quantityInput.value = currentValue + 1;
+    }
+    function decreaseQuantity() {
+        const quantityInput = document.getElementById('quantity');
+        const currentValue = parseInt(quantityInput.value || "1");
+        const minValue = parseInt(quantityInput.min || "1");
+        if (currentValue > minValue) quantityInput.value = currentValue - 1;
+    }
+    document.getElementById('quantity')?.addEventListener('input', function () {
+        const min = parseInt(this.min || "1");
+        const max = parseInt(this.max || this.value || "1");
+        if (this.value < min) this.value = min;
+        if (this.value > max) this.value = max;
+    });
+    function addToWishlist() { alert('Đã thêm vào danh sách yêu thích!'); }
+</script>
+
+@section Scripts {
+    <script>
+        (function () {
+            function renderStars(container, average) {
+                if (!container) return;
+                var avg = parseFloat(average) || 0;
+                var html = '';
+                for (var i = 1; i <= 5; i++) {
+                    html += (i <= Math.floor(avg)) ? '<i class="fas fa-star"></i>' : '<i class="far fa-star"></i>';
+                }
+                container.innerHTML = html;
+            }
+
+            var ratingContainer = document.getElementById('product-rating');
+            var avg = ratingContainer ? ratingContainer.dataset.average : 0;
+            var userRating = ratingContainer && ratingContainer.dataset.user ? ratingContainer.dataset.user : '';
+            userRating = userRating === '' ? null : parseInt(userRating);
+
+            if (ratingContainer) renderStars(ratingContainer, avg);
+            var ratingText = document.getElementById('rating-text');
+            if (ratingText) ratingText.innerText = (avg && parseFloat(avg) > 0) ? parseFloat(avg).toFixed(1) : 'Chưa có đánh giá';
+
+            // Init user rating buttons if present
+            var starButtons = document.querySelectorAll('.star-btn');
+            function highlightUserStars(value) {
+                starButtons.forEach(function (b) {
+                    var val = parseInt(b.getAttribute('data-value'));
+                    var icon = b.querySelector('i');
+                    icon.className = (val <= value) ? 'fas fa-star' : 'far fa-star';
+                });
+            }
+
+            if (userRating) highlightUserStars(userRating);
+
+            starButtons.forEach(function (btn) {
+                btn.addEventListener('mouseenter', function () {
+                    var v = parseInt(this.getAttribute('data-value'));
+                    starButtons.forEach(function (b) {
+                        var val = parseInt(b.getAttribute('data-value'));
+                        b.querySelector('i').className = val <= v ? 'fas fa-star' : 'far fa-star';
+                    });
+                });
+                btn.addEventListener('mouseleave', function () {
+                    if (userRating) highlightUserStars(userRating);
+                    else renderStars(ratingContainer, avg);
+                });
+                btn.addEventListener('click', function () {
+                    var value = parseInt(this.getAttribute('data-value'));
+                    submitRating(@Model.Id, value);
+                });
+            });
+
+            function getAntiForgeryToken() {
+                var el = document.querySelector('input[name="__RequestVerificationToken"]');
+                return el ? el.value : '';
+            }
+
+            function submitRating(productId, value) {
+                var token = getAntiForgeryToken();
+
+                fetch('/Product/Rate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': token // cần AddAntiforgery(HeaderName="RequestVerificationToken")
+                    },
+                    body: JSON.stringify({ productId: productId, value: value })
+                })
+                .then(async res => {
+                    if (!res.ok) throw new Error(await res.text() || 'Lỗi server');
+                    return res.json();
+                })
+                .then(() => {
+                    userRating = value;
+                    highlightUserStars(userRating);
+                    document.getElementById('rating-feedback').style.display = 'inline';
+
+                    // Cập nhật average mới
+                    fetch(`/api/public/products/${productId}`)
+                        .then(r => r.json())
+                        .then(p => {
+                            var newAvg = parseFloat(p.rating) || 0;
+                            avg = newAvg;
+                            renderStars(ratingContainer, newAvg);
+                            if (ratingText) ratingText.innerText = newAvg ? newAvg.toFixed(1) : 'Chưa có đánh giá';
+                        });
+
+                    setTimeout(() => document.getElementById('rating-feedback').style.display = 'none', 2200);
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('Không thể gửi đánh giá. Vui lòng thử lại.');
+                });
+            }
+        })();
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.0/signalr.min.js"></script>
+    <script src="~/js/productComments.js"></script>
+}

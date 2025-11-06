@@ -1,0 +1,124 @@
+﻿@model IEnumerable<ECommerceSystem.Shared.DTOs.Product.ProductDTO>
+@{
+    ViewData["Title"] = "Quản lý sản phẩm";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+
+    var categories = ViewBag.Categories as List<ECommerceSystem.Shared.DTOs.Category.CategoryDTO> ?? new();
+    var searchTerm = ViewBag.SearchTerm as string ?? "";
+    var selectedCategoryId = ViewBag.CategoryId as int?;
+    var currentPage = ViewBag.CurrentPage as int? ?? 1;
+    var totalPages = ViewBag.TotalPages as int? ?? 1;
+}
+
+<h2>Quản lý sản phẩm</h2>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="mb-3">
+    <a class="btn btn-success" asp-action="Create"><i class="bi bi-plus"></i> Thêm sản phẩm</a>
+</div>
+
+<!-- FILTER FORM -->
+<form asp-action="Index" method="get" class="mb-3">
+    <div class="row g-3">
+        <div class="col-md-4">
+            <input name="searchTerm" class="form-control" placeholder="Tìm kiếm theo tên sản phẩm" value="@ViewBag.SearchTerm" />
+        </div>
+        <div class="col-md-4">
+            <select name="categoryId" class="form-control"
+                    asp-items="@(new SelectList(categories, "Id", "Name", ViewBag.CategoryId))">
+                <option value="">Tất cả danh mục</option>
+            </select>
+        </div>
+        <div class="col-md-4">
+            <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i> Tìm kiếm</button>
+        </div>
+    </div>
+</form>
+
+<!-- PRODUCTS TABLE -->
+<table class="table table-bordered table-hover">
+    <thead class="table-light">
+        <tr>
+            <th>Tên</th>
+            <th>Giá (VND)</th>
+            <th>Danh mục</th>
+            <th>Khuyến mãi</th>
+            <th>Thao tác</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model == null || !Model.Any())
+        {
+            <tr>
+                <td colspan="5" class="text-muted text-center">Không có sản phẩm.</td>
+            </tr>
+        }
+        else
+        {
+            @foreach (var item in Model)
+            {
+                var matchedCategory = categories.FirstOrDefault(c => c.Id == item.CategoryId);
+                <tr>
+                    <td>@item.Name</td>
+                    <td>@item.Price.ToString("N0")</td>
+                    <td>@(matchedCategory?.Name ?? "Không có danh mục")</td>
+                    <td>@(item.IsPromoted ? "✔️" : "❌")</td>
+                    <td>
+                        <a class="btn btn-sm btn-primary" asp-action="Edit" asp-route-id="@item.Id">
+                            <i class="bi bi-pencil"></i> Sửa
+                        </a>
+                        <form asp-action="Delete" asp-route-id="@item.Id" method="post" style="display:inline;"
+                              onsubmit="return confirm('Bạn có chắc muốn xóa sản phẩm này?');">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-sm btn-danger">
+                                <i class="bi bi-trash"></i> Xóa
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+<!-- PAGINATION -->
+@if (totalPages >= 2)
+{
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                <a class="page-link" asp-action="Index" asp-route-page="@(currentPage - 1)"
+                   asp-route-searchTerm="@searchTerm" asp-route-categoryId="@selectedCategoryId">Trước</a>
+            </li>
+            @for (int i = 1; i <= totalPages; i++)
+            {
+                <li class="page-item @(i == currentPage ? "active" : "")">
+                    <a class="page-link" asp-action="Index" asp-route-page="@i"
+                       asp-route-searchTerm="@searchTerm" asp-route-categoryId="@selectedCategoryId">@i</a>
+                </li>
+            }
+            <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                <a class="page-link" asp-action="Index" asp-route-page="@(currentPage + 1)"
+                   asp-route-searchTerm="@searchTerm" asp-route-categoryId="@selectedCategoryId">Sau</a>
+            </li>
+        </ul>
+    </nav>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

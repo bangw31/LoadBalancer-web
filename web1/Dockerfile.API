@@ -1,0 +1,26 @@
+# Stage 1: Build
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+WORKDIR /src
+
+COPY ./ECommerceSystem.sln .
+COPY ./ECommerceSystem.Api/EcommerceSystem.API.csproj ./ECommerceSystem.Api/
+COPY ./ECommerceSystem.GUI/ECommerceSystem.GUI.csproj ./ECommerceSystem.GUI/
+COPY ./ECommerceSystem.Shared/ECommerceSystem.Shared.csproj ./ECommerceSystem.Shared/
+
+RUN dotnet restore ECommerceSystem.sln
+COPY . .
+
+# Publish API
+RUN dotnet publish ECommerceSystem.Api/EcommerceSystem.API.csproj -c Release -o /app/Api
+# Copy GUI vào wwwroot
+RUN dotnet publish ECommerceSystem.GUI/ECommerceSystem.GUI.csproj -c Release -o /app/Api/wwwroot
+
+# ===============================
+# Stage 2: Runtime
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
+WORKDIR /app/API
+COPY --from=build /app/Api ./
+
+EXPOSE 7068
+
+ENTRYPOINT ["dotnet", "EcommerceSystem.API.dll"]

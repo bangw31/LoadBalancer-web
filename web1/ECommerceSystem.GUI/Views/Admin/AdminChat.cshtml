@@ -1,0 +1,24 @@
+﻿@{
+    ViewData["Title"] = "Admin Chat";
+    Layout = "_AdminLayout";
+}
+
+<div class="row mt-3">
+    <div class="col-3 border-end">
+        <h6 class="text-center">👥 Người dùng</h6>
+        <div id="userList" style="max-height:500px; overflow-y:auto;"></div>
+    </div>
+    <div class="col-9">
+        <h6 id="chatTitle">💬 Chọn người dùng để chat</h6>
+        <div id="chatMessages" style="height:400px; overflow-y:auto; border:1px solid #ddd; border-radius:8px; padding:10px;"></div>
+        <div class="mt-2 d-flex">
+            <input type="text" id="chatMessageInput" class="form-control me-2" placeholder="Nhập tin nhắn..." />
+            <button id="sendChatBtn" class="btn btn-primary">Gửi</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+<script src="~/js/adminchat.js"></script>
+
+

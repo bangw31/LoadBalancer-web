@@ -1,0 +1,43 @@
+﻿.card {
+    border-radius: 12px;
+    transition: transform 0.3s ease;
+}
+
+    .card:hover {
+        transform: translateY(-4px);
+    }
+
+.text-primary {
+    font-weight: 600;
+}
+
+.btn-primary {
+    border-radius: 8px;
+    padding: 10px 20px;
+    transition: background-color 0.3s;
+}
+
+    .btn-primary:hover {
+        background-color: #0056b3;
+    }
+
+.list-group-item {
+    border: none;
+    background-color: #f8f9fa;
+    margin-bottom: 6px;
+    border-radius: 6px;
+}
+
+@media (max-width: 576px) {
+    .card-body {
+        padding: 1.5rem !important;
+    }
+
+    h2, h4 {
+        font-size: 1.25rem;
+    }
+
+    .btn-primary {
+        font-size: 0.9rem;
+    }
+}

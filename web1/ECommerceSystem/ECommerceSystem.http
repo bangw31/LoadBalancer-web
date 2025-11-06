@@ -1,0 +1,11 @@
+﻿@ECommerceSystem_HostAddress = https://localhost:7165
+
+@username=string
+@password=string
+POST {{ECommerceSystem_HostAddress}}/account/login/{id}?username={{username}}&password={{password}}
+
+###
+
+POST {{ECommerceSystem_HostAddress}}/account/login/{id}?username={{username}}&password={{password}}
+
+###

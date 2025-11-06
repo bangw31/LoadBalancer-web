@@ -1,0 +1,18 @@
+﻿@using ECommerceSystem.Shared.DTOs.Category
+@model List<CategoryDTO>
+
+@{
+    var selectedCategoryId = ViewBag.SelectedCategoryId as int?;
+}
+
+<nav class="category-menu d-flex gap-3 px-3 py-2 bg-dark text-white">
+    @foreach (var category in Model)
+    {
+        <a asp-controller="Home"
+           asp-action="Index"
+           asp-route-categoryId="@category.Id"
+           class="text-white text-decoration-none px-2 py-1 rounded @(selectedCategoryId == category.Id ? "bg-primary fw-bold" : "")">
+            <i class="fas fa-tag me-1"></i> @category.Name
+        </a>
+    }
+</nav>

@@ -1,0 +1,44 @@
+﻿@model ECommerceSystem.Shared.DTOs.Models.RegisterModel
+
+@{
+    ViewData["Title"] = "Đăng ký tài khoản";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+@if (ViewBag.ErrorMessage != null)
+{
+    <div class="alert alert-danger">@ViewBag.ErrorMessage</div>
+}
+
+<form asp-action="Register" method="post">
+    <div class="form-group">
+        <label asp-for="UserName"></label>
+        <input asp-for="UserName" class="form-control" data-val="true" data-val-required="Tên người dùng là bắt buộc" />
+        <span asp-validation-for="UserName" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Name"></label>
+        <input asp-for="Name" class="form-control" data-val="true" data-val-required="Tên là bắt buộc" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Email"></label>
+        <input asp-for="Email" class="form-control" data-val="true" data-val-email="Email không hợp lệ" data-val-required="Email là bắt buộc" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Password"></label>
+        <input asp-for="Password" class="form-control" type="password" data-val="true" data-val-required="Mật khẩu là bắt buộc" data-val-minlength="Mật khẩu phải có ít nhất 6 ký tự" />
+        <span asp-validation-for="Password" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Đăng ký</button>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

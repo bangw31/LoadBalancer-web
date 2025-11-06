@@ -1,0 +1,27 @@
+﻿@model ECommerceSystem.Shared.DTOs.User.UserDTO
+@{
+    ViewData["Title"] = "Chỉnh sửa người dùng";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+}
+<h2>Chỉnh sửa người dùng</h2>
+
+<form asp-action="Edit" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="Id" />
+
+    <div class="form-group">
+        <label asp-for="Email"></label>
+        <input asp-for="Email" class="form-control" readonly />
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Name"></label>
+        <input asp-for="Name" class="form-control" />
+    </div>
+
+    <div class="form-group mt-3">
+        <button type="submit" class="btn btn-primary">Lưu</button>
+        <a href="@Url.Action("Index", "User")" class="btn btn-secondary ml-2">Hủy</a>
+    </div>
+</form>

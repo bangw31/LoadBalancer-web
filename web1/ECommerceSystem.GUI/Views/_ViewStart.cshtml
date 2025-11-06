@@ -1,0 +1,13 @@
+﻿@{
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+
+    // Nếu là các controller dùng admin layout
+    if (controller == "Admin" || controller == "Product" || controller == "Order" || controller == "Category")
+    {
+        Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    }
+    else
+    {
+        Layout = "~/Views/Shared/_Layout.cshtml";
+    }
+}

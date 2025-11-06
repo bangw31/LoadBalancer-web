@@ -1,0 +1,12 @@
+﻿@if (User?.Identity?.IsAuthenticated == true && ViewBag.Notifications != null)
+{
+    <div class="notifications">
+        <h4>Notifications</h4>
+        <ul>
+            @foreach (var notif in ViewBag.Notifications)
+            {
+                <li>@notif.Message (@notif.Time)</li>
+            }
+        </ul>
+    </div>
+}

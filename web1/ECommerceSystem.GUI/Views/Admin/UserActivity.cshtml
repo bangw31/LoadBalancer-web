@@ -1,0 +1,40 @@
+﻿@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Hoạt động người dùng";
+    var activities = ViewBag.Activities as List<object>;
+}
+
+<h2 class="mb-4">Thống kê hoạt động người dùng</h2>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <p class="text-muted">Dưới đây là bảng thống kê số lượng truy cập vào các endpoint API.</p>
+        <table class="table table-bordered" id="activityTable">
+            <thead class="table-light">
+                <tr>
+                    <th>Hành động</th>
+                    <th>Lượt truy cập</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (activities != null && activities.Count > 0)
+                {
+                    foreach (var act in activities)
+                    {
+                        dynamic a = act;
+                        <tr>
+                            <td>@a.Action</td>
+                            <td>@a.Count</td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="2" class="text-center text-muted">Không có dữ liệu</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

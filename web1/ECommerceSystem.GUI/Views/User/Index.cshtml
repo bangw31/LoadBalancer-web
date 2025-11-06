@@ -1,0 +1,67 @@
+﻿@model List<ECommerceSystem.Shared.DTOs.User.UserDTO>
+@{
+    ViewData["Title"] = "Danh sách người dùng";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+<h2 class="mt-4">Danh sách người dùng</h2>
+
+<!-- Tìm kiếm -->
+<form asp-action="Search" method="get" class="mb-3 d-flex">
+    <input type="text" name="name" placeholder="Tìm theo tên..." class="form-control w-25 me-2" />
+    <button type="submit" class="btn btn-primary">Tìm</button>
+</form>
+
+<!-- Nút thêm người dùng -->
+<a href="@Url.Action("Create", "User")" class="btn btn-success mb-3">Thêm người dùng</a>
+
+<!-- Xoá nhiều người dùng -->
+<form asp-action="DeleteMultiple" method="post">
+    @Html.AntiForgeryToken()
+    <button type="submit" class="btn btn-danger mb-2" onclick="return confirm('Bạn chắc chắn muốn xoá những người dùng đã chọn?')">Xoá đã chọn</button>
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th><input type="checkbox" id="selectAll" /></th>
+                <th>Email</th>
+                <th>Tên</th>
+                <th>Đã xóa?</th>
+                <th>Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in Model)
+            {
+                <tr>
+                    <td>
+                        <input type="checkbox" name="selectedIds" value="@user.Id" />
+                    </td>
+                    <td>@user.Email</td>
+                    <td>@user.Name</td>
+                    <td>@(user.IsDeleted ? "✔" : "")</td>
+                    <td>
+                        <a class="btn btn-sm btn-warning" href="@Url.Action("Edit", "User", new { id = user.Id })">Sửa</a>
+
+                        <form asp-action="Delete" method="post" style="display:inline;">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@user.Id" />
+                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Xác nhận xóa người dùng này?')">Xóa</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</form>
+
+@section Scripts {
+    <script>
+        // Select/Deselect all checkboxes
+        document.getElementById("selectAll").addEventListener("click", function () {
+            const checkboxes = document.querySelectorAll("input[name='selectedIds']");
+            for (const checkbox of checkboxes) {
+                checkbox.checked = this.checked;
+            }
+        });
+    </script>
+}

@@ -1,0 +1,35 @@
+# ===========================
+# Stage 1: Build
+# ===========================
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+WORKDIR /src
+
+# Copy project files
+COPY ./ECommerceSystem.GUI/ECommerceSystem.GUI.csproj ./ECommerceSystem.GUI/
+COPY ./ECommerceSystem.Shared/ECommerceSystem.Shared.csproj ./ECommerceSystem.Shared/
+COPY ./ECommerceSystem.Api/EcommerceSystem.API.csproj ./ECommerceSystem.Api/
+COPY ./ECommerceSystem.sln ./ECommerceSystem.sln
+
+# Restore dependencies
+RUN dotnet restore ECommerceSystem.sln
+
+# Copy source
+COPY . .
+
+# Publish GUI app
+RUN dotnet publish ECommerceSystem.GUI/ECommerceSystem.GUI.csproj -c Release -o /app
+
+# ===========================
+# Stage 2: Runtime
+# ===========================
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
+WORKDIR /app
+
+# Copy published output
+COPY --from=build /app .
+
+# Expose port 8080
+EXPOSE 8080
+
+# Run the app
+ENTRYPOINT ["dotnet", "ECommerceSystem.GUI.dll"]

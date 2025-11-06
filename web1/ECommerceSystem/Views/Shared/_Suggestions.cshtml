@@ -1,0 +1,12 @@
+﻿@if (ViewBag.Suggestions != null && ViewBag.Suggestions.Any())
+{
+    <div class="suggestions">
+        <h4>Suggested Products</h4>
+        <ul>
+            @foreach (var item in ViewBag.Suggestions)
+            {
+                <li><a asp-controller="Products" asp-action="Detail" asp-route-id="@item.Id">@item.Name</a></li>
+            }
+        </ul>
+    </div>
+}

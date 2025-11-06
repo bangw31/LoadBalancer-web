@@ -1,0 +1,44 @@
+﻿@model List<ECommerceSystem.Shared.DTOs.Category.CategoryDTO>
+@{
+    ViewData["Title"] = "Danh sách danh mục";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+<h2 class="mt-4">Danh sách danh mục</h2>
+
+<a href="@Url.Action("CreateOrUpdate", "Category")" class="btn btn-success mb-3">Thêm mới</a>
+
+<form asp-action="DeleteAll" method="post" style="display:inline;">
+    @Html.AntiForgeryToken()
+    <button type="submit" class="btn btn-danger mb-3 ms-2"
+            onclick="return confirm('Bạn có chắc muốn xóa tất cả danh mục?');">
+        Xóa tất cả
+    </button>
+</form>
+
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Tên danh mục</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Id</td>
+                <td>@item.Name</td>
+                <td>
+                    <a class="btn btn-sm btn-warning" href="@Url.Action("CreateOrUpdate", "Category", new { id = item.Id })">Sửa</a>
+                    <form asp-action="Delete" method="post" style="display:inline;">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@item.Id" />
+                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Xác nhận xóa?')">Xóa</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

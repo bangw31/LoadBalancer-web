@@ -1,0 +1,17 @@
+﻿@if (User?.Identity?.IsAuthenticated == true)
+{
+    <span class="role-badge">
+        @if (User.IsInRole("Admin"))
+        {
+            <span>Admin</span>
+        }
+        else if (User.IsInRole("Seller"))
+        {
+            <span>Seller</span>
+        }
+        else
+        {
+            <span>Customer</span>
+        }
+    </span>
+}

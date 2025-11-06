@@ -1,0 +1,38 @@
+﻿@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Trang quản trị";
+}
+
+<div class="container mt-4">
+    <h2>Chào mừng bạn đến trang quản trị</h2>
+    <p>Chọn một mục trong menu bên trái để bắt đầu.</p>
+</div>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <!-- Welcome Section -->
+        <div class="col-lg-6 col-md-10 mb-4">
+            <div class="card shadow-lg border-0 animate__animated animate__fadeIn">
+                <div class="card-body text-center p-5">
+                    <h2 class="card-title mb-3 text-primary">Chào mừng đến với Trang Quản Trị</h2>
+                    <p class="card-text text-muted mb-4">Vui lòng chọn một mục trong menu bên trái để bắt đầu quản lý hệ thống.</p>
+                    <a href="/Product" class="btn btn-primary btn-lg">Khám phá ngay</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Todo List Section -->
+        <div class="col-lg-6 col-md-10 mb-4">
+            <div class="card shadow-lg border-0 animate__animated animate__fadeIn">
+                <div class="card-body p-4">
+                    <h4 class="card-title mb-3 text-primary">Danh sách công việc</h4>
+                    <div class="input-group mb-3">
+                        <input type="text" id="todoInput" class="form-control" placeholder="Thêm công việc mới..." aria-label="Thêm công việc">
+                        <button class="btn btn-primary" type="button" id="addTodo">Thêm</button>
+                    </div>
+                    <ul id="todoList" class="list-group"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

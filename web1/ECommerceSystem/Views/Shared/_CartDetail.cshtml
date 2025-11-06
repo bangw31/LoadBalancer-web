@@ -1,0 +1,14 @@
+﻿@if (ViewBag.CartItems != null && ViewBag.CartItems.Any())
+{
+    <div class="cart-detail">
+        <h4>Cart</h4>
+        <ul>
+            @foreach (var item in ViewBag.CartItems)
+            {
+                <li>@item.Name - @item.Quantity x @item.Price</li>
+            }
+        </ul>
+        <p>Total: @ViewBag.CartTotal</p>
+        <a asp-controller="Orders" asp-action="Create">Checkout</a>
+    </div>
+}

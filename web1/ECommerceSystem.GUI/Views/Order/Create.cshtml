@@ -1,0 +1,80 @@
+﻿@model ECommerceSystem.Shared.DTOs.Product.CreateOrderRequest
+@{
+    ViewData["Title"] = "Tạo đơn hàng";
+}
+<h2>@ViewData["Title"]</h2>
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+<form asp-action="Create" method="post">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="All" class="text-danger"></div>
+    <div class="form-group">
+        <label asp-for="UserId" class="control-label"></label>
+        <input asp-for="UserId" class="form-control" type="number" required />
+        <span asp-validation-for="UserId" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="DeliveryLocation" class="control-label"></label>
+        <input asp-for="DeliveryLocation" class="form-control" required />
+        <span asp-validation-for="DeliveryLocation" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="PaymentMethod" class="control-label"></label>
+        <select asp-for="PaymentMethod" class="form-control" required>
+            <option value="">Chọn phương thức</option>
+            <option value="Cash">Tiền mặt</option>
+            <option value="BankTransfer">Chuyển khoản</option>
+        </select>
+        <span asp-validation-for="PaymentMethod" class="text-danger"></span>
+    </div>
+    <h4>Sản phẩm</h4>
+    <table class="table table-bordered" id="items">
+        <thead>
+            <tr>
+                <th>Sản phẩm ID</th>
+                <th>Số lượng</th>
+                <th>Giá</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+    <button type="button" onclick="addItem()" class="btn btn-secondary mb-2">Thêm sản phẩm</button>
+    <div class="form-group">
+        <label asp-for="Total" class="control-label"></label>
+        <input asp-for="Total" class="form-control" readonly />
+        <span asp-validation-for="Total" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Đặt hàng</button>
+        <a href="@Url.Action("Index", "Home")" class="btn btn-secondary">Hủy</a>
+    </div>
+</form>
+<script>
+    function addItem() {
+        const table = document.querySelector('#items tbody');
+        const index = table.rows.length;
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td><input type="number" name="Items[${index}].ProductId" class="form-control" required /></td>
+            <td><input type="number" name="Items[${index}].Quantity" class="form-control" required min="1" oninput="calculateTotal()" /></td>
+            <td><input type="number" name="Items[${index}].Price" class="form-control" required min="0" step="0.01" oninput="calculateTotal()" /></td>
+            <td><button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.parentElement.remove(); calculateTotal()">Xóa</button></td>
+        `;
+        table.appendChild(row);
+    }
+
+    function calculateTotal() {
+        const items = document.querySelectorAll('#items tbody tr');
+        let total = 0;
+        items.forEach(row => {
+            const quantity = parseFloat(row.querySelector('[name*="Quantity"]').value) || 0;
+            const price = parseFloat(row.querySelector('[name*="Price"]').value) || 0;
+            total += quantity * price;
+        });
+        document.querySelector('[name="Total"]').value = total.toFixed(2);
+    }
+</script>
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.validate/1.19.3/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.validate.unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"></script>
+}

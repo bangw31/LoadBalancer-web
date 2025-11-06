@@ -1,0 +1,80 @@
+﻿@{
+    ViewData["Title"] = "User Chat";
+}
+
+<!-- 💬 Khung chat -->
+<div id="chatContainer" class="chat-container">
+    <div class="chat-header d-flex justify-content-between align-items-center p-2">
+        <span><i class="fas fa-headset me-2"></i> Hỗ trợ trực tuyến</span>
+        <button id="closeChat" class="btn btn-sm btn-danger">&times;</button>
+    </div>
+
+    <div id="chatMessages" class="chat-messages p-2"></div>
+
+    <div class="chat-input d-flex border-top p-2">
+        <input id="chatMessageInput" type="text" class="form-control me-2" placeholder="Nhập tin nhắn..." />
+        <button id="sendChatMessage" class="btn btn-primary">Gửi</button>
+    </div>
+</div>
+
+<!-- ======================== CSS ======================== -->
+<style>
+    .chat-container {
+        display: flex;
+        flex-direction: column;
+        height: 380px;
+        background: #fff;
+        border-radius: 8px;
+    }
+
+    .chat-header {
+        font-weight: bold;
+        background: #2563eb;
+        color: white;
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+    }
+
+    .chat-messages {
+        flex-grow: 1;
+        overflow-y: auto;
+        background: #f8f9fa;
+        padding: 10px;
+    }
+
+    .chat-message {
+        display: inline-block;
+        margin-bottom: 8px;
+        padding: 8px 12px;
+        border-radius: 15px;
+        max-width: 80%;
+        clear: both;
+        word-break: break-word;
+    }
+
+        .chat-message.user {
+            background: #2563eb;
+            color: white;
+            float: right;
+            text-align: right;
+        }
+
+        .chat-message.admin {
+            background: #e2e8f0;
+            color: #111827;
+            float: left;
+            text-align: left;
+        }
+
+    .chat-input input {
+        border-radius: 20px;
+    }
+
+    .chat-input button {
+        border-radius: 20px;
+    }
+
+    #closeChat {
+        cursor: pointer;
+    }
+</style>

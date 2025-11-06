@@ -1,0 +1,97 @@
+﻿@model ECommerceSystem.Shared.DTOs.Models.CheckoutModel
+@{
+    var cart = ViewBag.Cart as ECommerceSystem.Shared.DTOs.Product.CartDTO;
+    ViewData["Title"] = "Thanh toán";
+    decimal discountAmount = ViewBag.DiscountAmount ?? 0m;
+    decimal finalTotal = ViewBag.FinalTotal ?? (cart?.Total ?? 0m);
+    decimal discountPercent = ViewBag.DiscountPercent ?? 0m;
+}
+
+<h2>@ViewData["Title"]</h2>
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+<form asp-action="Checkout" method="post">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label asp-for="Name"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger" />
+            </div>
+            <div class="form-group">
+                <label asp-for="Email"></label>
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger" />
+            </div>
+            <div class="form-group">
+                <label asp-for="MobileNumber"></label>
+                <input asp-for="MobileNumber" class="form-control" />
+                <span asp-validation-for="MobileNumber" class="text-danger" />
+            </div>
+            <div class="form-group">
+                <label asp-for="Address"></label>
+                <textarea asp-for="Address" class="form-control"></textarea>
+                <span asp-validation-for="Address" class="text-danger" />
+            </div>
+            <div class="form-group">
+                <label asp-for="PaymentMethod">Phương thức thanh toán</label>
+                <select asp-for="PaymentMethod" class="form-control">
+                    <option value="">-- Chọn --</option>
+                    <option>COD</option>
+                    <option>Chuyển khoản</option>
+                    <option>VNPay</option>
+                </select>
+                <span asp-validation-for="PaymentMethod" class="text-danger" />
+            </div>
+
+            <button type="submit" class="btn btn-primary mt-3">Xác nhận thanh toán</button>
+        </div>
+
+        <div class="col-md-6">
+            <h4>Đơn hàng</h4>
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>Sản phẩm</th>
+                        <th>SL</th>
+                        <th>Giá</th>
+                        <th>Thành tiền</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in cart.Items)
+                    {
+                        <tr>
+                            <td>@item.Name</td>
+                            <td>@item.Quantity</td>
+                            <td>@item.Price.ToString("N0")</td>
+                            <td>@((item.Price * item.Quantity).ToString("N0") + " VND")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <div class="mt-2">
+                <p>Tổng gốc: <strong>@((cart.Total).ToString("N0") + " VND")</strong></p>
+
+                @if (discountAmount > 0)
+                {
+                    <p class="text-success">Ưu đãi (@discountPercent.ToString("0.##")%): -@((discountAmount).ToString("N0") + " VND")</p>
+                    <h5>Tổng sau ưu đãi: <strong>@((finalTotal).ToString("N0") + " VND")</strong></h5>
+                }
+                else
+                {
+                    <h5 class="mt-2">Tổng tiền: <strong>@((cart.Total).ToString("N0") + " VND")</strong></h5>
+                }
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

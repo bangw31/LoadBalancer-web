@@ -1,0 +1,30 @@
+@ECommerceSystem.Api_HostAddress = https://localhost:7068
+
+GET {{ECommerceSystem.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
+
+@type=string
+@period=string
+GET {{ECommerceSystem.Api_HostAddress}}/api/admin/statistics?type={{type}}&period={{period}}
+
+###
+
+POST {{ECommerceSystem.Api_HostAddress}}/api/auth/register
+Content-Type: application/json
+
+{
+  //RegisterModel
+}
+
+###
+
+POST {{ECommerceSystem.Api_HostAddress}}/api/auth/register
+Content-Type: application/json
+
+{
+  //RegisterModel
+}
+
+###
