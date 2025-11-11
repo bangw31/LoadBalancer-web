@@ -33,6 +33,8 @@ services:
       - monitoring
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=172.31.17.1,1433;Database=NewbieShop;User ID=sa;Password=bang31102004;TrustServerCertificate=True;Encrypt=False;
+      - ConnectionStrings__Redis=redis:6379
 
   web1_gui:
     build:
