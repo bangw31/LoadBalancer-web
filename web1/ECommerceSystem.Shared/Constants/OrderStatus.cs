@@ -22,7 +22,7 @@ namespace ECommerceSystem.Shared.Constants
     }
     public static class AppConstants
     {
-        public const string ApiBaseUrl = "https://localhost:7068";
+        public const string ApiBaseUrl = "http://web1_api:8080";
         public const string HubPattern = "/hubs/social-hub";
         public const string HubFullUrl = ApiBaseUrl + HubPattern;
     }
