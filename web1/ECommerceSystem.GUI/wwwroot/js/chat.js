@@ -8,6 +8,7 @@ window.selectedFileType = null;
 window.selectedFileName = null;
 
 const appendedMessageIds = new Set();
+const API_BASE = window.location.origin;
 
 function initUserChat() {
     if (isChatInitialized) return;
@@ -31,7 +32,7 @@ function initUserChat() {
 
     // ====================== SIGNALR ======================
     connection = new signalR.HubConnectionBuilder()
-        .withUrl("https://localhost:7068/chathub", { accessTokenFactory: () => token })
+        .withUrl(`${API_BASE}/chathub`, { accessTokenFactory: () => token })
         .withAutomaticReconnect()
         .configureLogging(signalR.LogLevel.Information)
         .build();
@@ -103,7 +104,7 @@ function initUserChat() {
         console.log("🔄 Đang tải lịch sử...");
 
         try {
-            const url = "https://localhost:7068/api/chat/history";
+            const url = `${window.location.origin}/api/chat/history`;
             const res = await fetch(url, {
                 method: "GET",
                 headers: {
@@ -167,7 +168,7 @@ function initUserChat() {
         const formData = new FormData();
         formData.append("file", file);
 
-        const res = await fetch("https://localhost:7068/api/chat/upload", {
+        const res = await fetch(`${API_BASE}/api/chat/upload`, {
             method: "POST",
             body: formData,
             headers: { "Authorization": `Bearer ${token}` }
@@ -203,7 +204,7 @@ function initUserChat() {
 
         try {
             console.log("➡️ POST /api/chat/customer/send payload:", payload);
-            const res = await fetch("https://localhost:7068/api/chat/customer/send", {
+            const res = await fetch(`${API_BASE}/api/chat/customer/send`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
