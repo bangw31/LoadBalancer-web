@@ -25,7 +25,7 @@ namespace ECommerceSystem.GUI.Controllers
         }
 
         [AllowAnonymous]
-        [HttpGet("/")]
+        [HttpGet("/health")]
         public IActionResult LoadTest()
         {
             return Content("OK", "text/plain");
