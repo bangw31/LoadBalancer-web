@@ -3,6 +3,7 @@ using ECommerceSystem.GUI.Models;
 using ECommerceSystem.Shared.DTOs.Product;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Authorization;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Collections.Generic;
