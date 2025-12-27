@@ -32,6 +32,7 @@ namespace ECommerceSystem.GUI.Controllers
         }
 
         // Trang chủ - có thể lọc theo danh mục
+        [HttpGet("/")]
         public async Task<IActionResult> Index(int? categoryId = null, int page = 1)
         {
             int pageSize = 9;
