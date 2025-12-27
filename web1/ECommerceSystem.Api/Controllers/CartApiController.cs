@@ -61,6 +61,7 @@ namespace ECommerceSystem.Api.Controllers
         /// Lấy tổng số lượng mặt hàng trong giỏ
         /// </summary>
         [HttpGet("count")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetCartItemCount()
         {
             var count = await _cartRepo.GetCartItemCount(); // Lấy tổng số item
