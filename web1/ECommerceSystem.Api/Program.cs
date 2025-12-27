@@ -20,14 +20,6 @@ using Role = ECommerceSystem.Shared.Entities.Role;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
-
-if (!Directory.Exists(uploadsPath))
-{
-    Directory.CreateDirectory(uploadsPath);
-}
-
-
 #region === Kestrel / URLs ===
 builder.WebHost.ConfigureKestrel(options =>
 {
@@ -194,11 +186,6 @@ if (!app.Environment.IsDevelopment())
 
 app.UseStaticFiles();
 
-app.UseStaticFiles(new StaticFileOptions
-{
-    FileProvider = new PhysicalFileProvider(uploadsPath),
-    RequestPath = "/uploads"
-});
 app.UseIpRateLimiting();
 app.UseRouting();
 
