@@ -23,6 +23,13 @@ namespace ECommerceSystem.GUI.Controllers
             _productApi = productApi;
         }
 
+        [AllowAnonymous]
+        [HttpGet("/")]
+        public IActionResult LoadTest()
+        {
+            return Content("OK", "text/plain");
+        }
+
         // Trang chủ - có thể lọc theo danh mục
         public async Task<IActionResult> Index(int? categoryId = null, int page = 1)
         {
