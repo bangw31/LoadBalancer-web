@@ -2,6 +2,7 @@ version: '3'
 
 services:
   nginx_lb:
+    hostname: ${HOSTNAME}
     image: nginx:latest
     container_name: nginx_lb
     ports:
